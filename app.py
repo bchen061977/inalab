@@ -12,7 +12,8 @@ Greetings
 """
 @app.route("/")
 def hello():
-    return "Hello, World!"
+    content = os.environ.get('CONTENT', 'Hello, World!')
+    return content
 
 """
 Return sample JSON data

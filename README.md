@@ -1,48 +1,39 @@
-# Simple Flask App
+# Inalab Simple Flask App Project
 
-A Python Flask application that says "Hello, World!"
+Application is containerized using docker compose with nginx reverse proxy listening on port 80 and flask app listening on port 5000. 
+Cloudformation template in folder cloudformation. Need to replace ami to be used.
 
-## Goal
+## Docker Compose
 
-* "Dockerize" the application, providing an image and a configuration for
-  running locally with Docker Compose.
-* Provide a script to retrieve data from application and perform basic parsing.
-* Provide a reverse proxy configuration.
+Run Application with docker-compose up
+This will start the 2 containers 1 for nginx 1 for flask app
+To Change Hello, World! edit the .env file and change the variable CONTENT
 
-## Docker Exercise
+## Scripting
 
-* Provide a `Dockerfile` to build and run the application.
-* Modify the application to replace _Hello, World!_ with an optional string set
-  using an environment variable and defaulting to _Hello, World!_
-* Provide a `docker-compose.yml` file to run the application and set a custom
-  string using an environment variable.
+To run data verifcation script use command python3 ./test-data.py
+This script parses json data and creates files in files directory under name [id].txt and sum's the files contents using SHA256 and compares to file names
 
-This should result in the ability to navigate to <http://localhost:5000/> and see
-the custom greeting.
+## Reverse proxy using Cloudformation
 
-## Scripting Exercise
+This creates the following resources in 2 Availabiltiy Zones for redundancy
 
-Provide a script or code in a language or tool of your choice that will parse
-the data returned from <http://localhost:5000/data> and create a file in a
-`files/` sub-directory named `<id>.txt` with the _name_ as the contents of the
-file.
-E.g. `files/3fc4ccfe745870e2c0d99f71f30ff0656c8dedd41cc1d7d3d376b0dbe685e2f3.txt`
+*VPC using subnet 192.168.0.0/22 
+*Public Subnet1: 192.1658.0.0/24
+*Public Subnet2: 192.1658.1.0/24
+*Private Subnet1: 192.1658.2.0/24
+*Private Subnet2: 192.1658.3.0/24
+*2 NAT Gateways
+*1 Internet Gateway
+*2 EC2 Intances Running NGINX
+*2 Load Balancers
 
-Note: The SHA256 sum of each file's contents (`<name>`) should match the `<id>`.
+And corresponding security groups, route tables, Elastic IPS, and Network ACL's
 
-## Reverse Proxy Configuration
+EC2 Instances are in the private subnets only being accessible from the private subnet
+Load Balancers are on the public subnet to route traffic to the EC2 Instances
 
-Provide a minimal reverse proxy configuration for the application. This can be anything -
-an Nginx, Apache, or Traefik config, a Terraform, CloudFormation, or CDK
-configuration for AWS Load Balancing, etc.
+Need to setup route 53 to point to 2 load balancrs
 
-It does not have to be implemented and functional in this exercise.
+EC2 Instances install docker & docker compose, will clone this repository and run docker-compose up at startup
 
-Idea: Try the [nginx](https://hub.docker.com/_/nginx) or
-[traefik](https://hub.docker.com/_/traefik) Docker image ran from the same
-Docker Compose file as the application.
-
-## Submittal
-
-Push your solution to your own repository on GitHub, GitLab, another public
-repository, or provide an archive file (.zip) to the team.
